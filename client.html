@@ -11,8 +11,19 @@
         ws = new WebSocket('ws://localhost:8000');
 
         ws.onmessage = (m) => {
-            console.log(m)
+            console.log(m);
         }
+
+        function loop(){
+            requestAnimationFrame(loop);
+            setTimeout(ws.send(JSON.stringify({
+                "status": "good", 
+                "nothing": true,
+                "OUO": 123
+            })))
+        }
+        
+        loop()
     </script>
 </body>
 </html>

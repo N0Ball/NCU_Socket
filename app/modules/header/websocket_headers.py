@@ -45,7 +45,7 @@ class WebSocket(Header):
 
                 header_len = TEMP_HEADER["PL_len"] if TEMP_HEADER["Extended payload length"] == None else TEMP_HEADER["Extended payload length"]
 
-                target = self.HEADER[header_index // 8 : header_index // 8 + header_len]
+                target = self.HEADER[header_index // 8 : header_index // 8 + header_len].decode('utf-8')
                 if TEMP_HEADER["Mask"] == 1:
                     TEMP_HEADER["Mask-Key"] = list(map(lambda i: TEMP_HEADER["Mask-Key"] >> ((3 - i)*8) & 0xff, range(4)))
                     target = list(target)

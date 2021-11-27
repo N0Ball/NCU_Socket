@@ -47,7 +47,7 @@ class _WebSocket:
             if client.HOST == host and client.PORT == port:
                 return True
 
-        self.CLIENTS.push(Client(client, host, port))
+        self.CLIENTS.append(Client(client, host, port))
         return False
 
     def _register(self, client, addr):
@@ -70,7 +70,7 @@ class _WebSocket:
 class WebSocket(_WebSocket):
 
     def __init__(self, host: str, port: int, backlog: int) -> None:
-        super.__init__()
+        super().__init__()
         self.SOCKET = Server(host, port, backlog)
 
         @self.SOCKET.client()
