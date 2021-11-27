@@ -13,23 +13,11 @@ class BASEMODE:
     def __init__(self) -> None:
         pass
 
-    def __dict__(self):
-
-        return {
-            "MODE": self.MODE,
-            "PORT": int(self.PORT),
-            "HOST": self.HOST,
-            "BACKLOG": int(self.BACKLOG)
-        }
-
-    def __call__(self) -> dict:
-        return self.__dict__()
-
 class Dev(BASEMODE):
 
     def __init__(self) -> None:
         super().__init__()
-        self.MODE = "Development"
+        self.MODE = "DEV"
         self.PORT = 8000
         self.HOST = 'localhost'
         self.BACKLOG = 10
@@ -38,16 +26,16 @@ class Deploy(BASEMODE):
 
     def __init__(self) -> None:
         super().__init__()
-        self.MODE = "Deployment"
-        self.PORT = os.getenv('PORT') or '0.0.0.0'
-        self.HOST = os.getenv('HOST') or 8000
+        self.MODE = "DEPLOY"
+        self.PORT = int(os.getenv('PORT')) or 8000
+        self.HOST = os.getenv('HOST') or '0.0.0.0'
         self.BACKLOG = 10
 
 class Debug(Dev):
 
     def __init__(self) -> None:
         super().__init__()
-        self.DEBUG = "Debugging"
+        self.MODE = "DEBUG"
 
 
 def getModeConfig(status: str) -> BASEMODE:
