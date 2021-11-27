@@ -1,6 +1,6 @@
 import unittest
 
-from ..http_headers import HTTP11
+from ..http_headers import HTTP11, HTTPStatus
 
 NORMAL_HTTP11_HEADER = """\
 GET /a/b HTTP/1.1\r
@@ -36,22 +36,42 @@ Cache-Control: no-cache\r
 \r
 """
 
+RESULT_HTTP11_HEADER = b"""\
+HTTP/1.1 200 OK\r
+Age: 521648\r
+Keep-Alive: 300\r
+\r
+"""
+
 class HTTPHeaderTestCase(unittest.TestCase):
 
     def _test_http11_header(self, raw_header, expt):
         header = HTTP11(raw_header).to_dict()
         self.assertEqual(header['Test-Data'], expt)
 
+    def _test_http11_create_header(self, code, msg, expt, **headers):
+        header = HTTP11()
+        header.setResponseHeader(
+            HTTPStatus(code, msg),
+            **headers
+        )
+
+        self.assertEqual(expt, header.raw())
+
     def _test_http11_version_failed(self, raw_header, expt):
         with self.assertRaises(TypeError) as e:
             _ = HTTP11(raw_header).to_dict()
-
         self.assertEqual(str(e.exception), expt)
 
     def test_normal_http1(self):
         self._test_http11_header(NORMAL_HTTP11_HEADER, "test-data_123")
     def test_http11_version_failed(self):
         self._test_http11_version_failed(FAILED_HTTP11_HEADER, "Only HTTP version 1.1 are permitted")
+    def test_create_http1(self):
+        self._test_http11_create_header(200, 'OK', RESULT_HTTP11_HEADER, **{
+            "Age": 521648,
+            "Keep-Alive": 300,
+        })
 
 if __name__ == '__main__':
     unittest.main()

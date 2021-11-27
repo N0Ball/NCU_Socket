@@ -23,7 +23,6 @@ class HTTP(Header, ABC):
             raise ValueError("No HTTP version was find in the header")
 
         version = parsed_headers[0][version_location:version_location+VERSION_SIZE]
-        print(version)
 
         self._checkVersion(version)
 
@@ -47,7 +46,7 @@ class HTTP(Header, ABC):
         self.HEADER = "HTTP/1.1 " + str(status.code) + ' ' + status.msg + '\r\n'
 
         for key in headers:
-            self.HEADER += key + ": " + headers.get(key) + '\r\n'
+            self.HEADER += key + ": " + str(headers.get(key)) + '\r\n'
 
         self.HEADER += '\r\n'
 

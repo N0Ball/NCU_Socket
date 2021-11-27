@@ -1,3 +1,6 @@
+from typing import ByteString
+
+
 class Header:
 
     def __init__(self, header) -> None:
@@ -9,6 +12,9 @@ class Header:
 
     def to_dict(self) -> dict:
         return self._parser()
+
+    def raw(self) -> ByteString:
+        return self.HEADER.encode('utf-8')
 
     def __str__(self) -> str:
 
