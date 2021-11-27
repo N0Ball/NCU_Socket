@@ -15,12 +15,21 @@ class WebSocketHeaderTestCase(unittest.TestCase):
         self.assertEqual(FIN, 1)
         self.assertEqual(PL, expt)
 
+    def _test_create(self, target, expt):
+        socket = WebSocket()
+        socket.create(target)
+        self.assertEqual(socket.HEADER, expt)
+
     def test_without_mask(self):
         self._test_WebSocket_parser(HEADER_WITHOUT_MASK, 'hello')
     def test_with_mask(self):
         self._test_WebSocket_parser(HEADER_WITH_MASK, '{"status":"good","nothing":true,"OUO":123}')
     def test_with_long_data(self):
         self._test_WebSocket_parser(LONG_HEADER, '{"method":"Debugger.scriptParsed","params":{"scriptId":"254","url":"file:///c:/Users/chain/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/node_modules.asar/get-uri/node_modules/file-uri-to-path/dist/src/index.js","startLine":0,"startColumn":0,"endLine":51,"endColumn":3,"executionContextId":1,"hash":"2900fd891a08d1ad4509719e35de1482304cf82a","executionContextAuxData":{"isDefault":true},"isLiveEdit":false,"sourceMapURL":"https://ticino.blob.core.windows.net/sourcemaps/ccbaa2d27e38e5afa3e5c21c1c7bef4657064247/node_modules/get-uri/node_modules/file-uri-to-path/dist/src/index.js.map","hasSourceURL":false,"isModule":false,"length":2042,"stackTrace":{"callFrames":[{"functionName":"_acceptInsertText","scriptId":"132","url":"file:///c:/Users/chain/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/services/extensions/node/extensionHostProcess.js","lineNumber":76,"columnNumber":16778}]},"scriptLanguage":"JavaScript","embedderName":"file:///c:/Users/chain/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/node_modules.asar/get-uri/node_modules/file-uri-to-path/dist/src/index.js"}}')
+    def test_create(self):
+        self._test_create("{'OUO': 'OUO!', 'status': 100}", b"\x81\x1e{'OUO': 'OUO!', 'status': 100}")
+        
+
 
 if __name__ == '__main__':
 

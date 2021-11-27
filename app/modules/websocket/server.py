@@ -67,6 +67,12 @@ class _WebSocket:
         data = "NAN"
         self.serv_func(data)
 
+    def recv():
+        pass
+
+    def send():
+        pass
+
 class WebSocket(_WebSocket):
 
     def __init__(self, host: str, port: int, backlog: int) -> None:

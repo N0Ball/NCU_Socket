@@ -4,7 +4,7 @@ from .base import Header
 
 class WebSocket(Header):
 
-    def __init__(self, header: ByteString) -> None:
+    def __init__(self, header: ByteString = None) -> None:
         super().__init__(header)
         self.HEADERS = {
             "FIN": 1,
@@ -18,6 +18,35 @@ class WebSocket(Header):
             "Mask-Key": 32,
             "Payload data": None 
         }
+
+    def create(self, msg: str):
+        length = len(msg)
+        msg = msg.encode('utf-8')
+        payload_len = 0
+        extend_len = 0
+
+        if length > 0xffffffffffffffff:
+            raise BufferError("Msg too long")
+        elif length > 0xffff:
+            payload_len = 127
+            extend_len = length
+        elif length > 0xff-1:
+            payload_len = 126
+            extend_len = length
+        else:
+            payload_len = length
+        
+        payload = b'\x81' + payload_len.to_bytes(1, byteorder='big')
+        if extend_len == 0:
+            payload += msg
+        elif payload_len == 127:
+            payload += extend_len.to_bytes(4, byteorder='big') + msg
+        elif payload_len == 126:
+            payload += extend_len.to_bytes(16, byteorder='big') + msg
+        else:
+            raise SystemError("payload_len is not correctlly set")
+
+        self.HEADER = payload
 
     def _parser(self) -> None:
 
