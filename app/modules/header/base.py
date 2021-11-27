@@ -17,5 +17,4 @@ class Header:
         return self.HEADER.encode('utf-8')
 
     def __str__(self) -> str:
-
         return self.HEADER

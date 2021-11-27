@@ -1,11 +1,12 @@
 import unittest
 
-from ..server import create_accept
+from ..server import _WebSocket
 
 class WebSocketTestCase(unittest.TestCase):
     
     def test_create_accpet(self):
-        accpet = create_accept('dGhlIHNhbXBsZSBub25jZQ==')
+        webSocket = _WebSocket()
+        accpet = webSocket._get_accept('dGhlIHNhbXBsZSBub25jZQ==')
         self.assertEqual(accpet, 's3pPLMBiTxaQ9kYGzzhZRbK+xOo=')
 
 
