@@ -9,6 +9,10 @@
 <body>
     <script>
         ws = new WebSocket('ws://localhost:8000');
+
+        ws.onmessage = (m) => {
+            console.log(m)
+        }
     </script>
 </body>
 </html>

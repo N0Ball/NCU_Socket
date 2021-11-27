@@ -51,8 +51,8 @@ class Server:
         while True:
 
             try:
-                self.client_response(client, addr)
-
+                if self.client_response(client, addr):
+                    break
             except:
                 client.close()
                 return False

@@ -1,7 +1,7 @@
 {
     "python.linting.enabled": true,
     "python.analysis.extraPaths": [
-        "./app"
+        "./app",
     ],
     "python.envFile": "${workspaceFolder}/.env",
     "python.pythonPath": "${workspaceFolder}/.venv/bin/python3",
