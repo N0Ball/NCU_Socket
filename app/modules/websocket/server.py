@@ -6,11 +6,21 @@ import base64
 from typing import ByteString
 from ..socket.server import Server
 from ..header.http_headers import HTTP11, HTTPStatus
+from ..header import websocket_headers
+
+class OpCode:
+
+    TEXT = 0x1
+    BINARY = 0x2
+    CLOSE = 0x8
+    PING = 0x9
+    PONG = 0xa
 
 class Client:
 
     def __init__(self, client, host, port) -> None:
         self.CLIENT = client
+        self.ADDR = (host, port)
         self.HOST = host
         self.PORT = port
 
@@ -18,6 +28,7 @@ class _WebSocket:
 
     def __init__(self):
         self.CLIENTS = []
+        self.TERMINATE = False
     
     def _get_key(self, header: str) -> str:
         return HTTP11(header).to_dict()['Sec-WebSocket-Key']
@@ -42,12 +53,13 @@ class _WebSocket:
 
     def _check_register(self, host: str, port: int, client: socket) -> bool:
 
-        for client in self.CLIENTS:
+        for connected_client in self.CLIENTS:
             
-            if client.HOST == host and client.PORT == port:
+            if connected_client.HOST == host and connected_client.PORT == port:
                 return True
 
-        self.CLIENTS.append(Client(client, host, port))
+        self.CLIENTS.append(Client(client, host, port))    
+
         return False
 
     def _register(self, client, addr):
@@ -64,14 +76,54 @@ class _WebSocket:
         logging.debug(f"MSG: {str(RES)}")
 
     def _serve(self, client, addr):
-        data = "NAN"
-        self.serv_func(data)
+        self.serv_func(self, client, addr)
 
-    def recv():
-        pass
+    def client(self):
 
-    def send():
-        pass
+        def wrapper(func):
+            self.serv_func = func
+
+        return wrapper
+
+    def broadcast(self, msg: str) -> None:
+        for client in self.CLIENTS:
+            self.send(client.CLIENT, client.ADDR, msg)
+
+    def recv(self, client, addr) -> str:
+        rec = client.recv(0xfffffff)
+        logging.info(f"Recieve data from {addr[0]}:{addr[1]}")
+        logging.debug(f"MSG: {rec}")
+        websocket_frame = websocket_headers.WebSocket(rec).to_dict()
+        opcode = websocket_frame["OpCode"]
+
+        if opcode == OpCode.CLOSE:
+            self.terminate(client)
+            return "Socket had closed"
+        elif opcode == OpCode.TEXT:
+            return websocket_frame["Payload data"]
+        else:
+            raise ValueError("Invalid OpCode recieved")
+
+    def send(self, client, addr, msg: str) -> None:
+        payload = websocket_headers.WebSocket()
+        payload.create(msg)
+        client.send(payload.raw())
+        logging.info(f"Send data to {addr[0]}:{addr[1]}")
+        logging.debug(f"MSG: {msg}")
+
+    def terminate(self, client) -> None:
+
+        client.close()
+        target = None
+        self.TERMINATE = True
+
+        for clientSocket in self.CLIENTS:
+
+            if clientSocket.CLIENT == client:
+                target = clientSocket
+                break
+        
+        self.CLIENTS.remove(target)
 
 class WebSocket(_WebSocket):
 
@@ -86,17 +138,21 @@ class WebSocket(_WebSocket):
 
                 self._register(client, addr) if not self._check_register(addr[0], addr[1], client) else self._serve(client, addr)
 
-                return True
+                if self.TERMINATE:
+                    self.TERMINATE = False
+                    return True
+                else:
+                    return False
 
             except socket.timeout:
                 logging.info(f"Websocket closed because timeout")
-                client.close()
+                self.terminate(client)
                 return True
 
             except Exception as e:
                 traceback.print_exc()
                 logging.error(f'Meet error: {e}')
-                client.close()
+                self.terminate(client)
                 return True
 
     def run(self):

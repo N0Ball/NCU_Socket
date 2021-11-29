@@ -7,6 +7,8 @@
     <title>Client</title>
 </head>
 <body>
+    <button type="submit" onclick="closeSocket();">Close WebSocket</button>
+    <button type="submit" onclick="sendHello();">Send Hello</button>
     <script>
         ws = new WebSocket('ws://localhost:8000');
 
@@ -14,16 +16,13 @@
             console.log(m);
         }
 
-        function loop(){
-            requestAnimationFrame(loop);
-            setTimeout(ws.send(JSON.stringify({
-                "status": "good", 
-                "nothing": true,
-                "OUO": 123
-            })))
+        function sendHello(){
+            ws.send("Hello, world!");
         }
-        
-        loop()
+
+        function closeSocket(){
+            ws.close();
+        }
     </script>
 </body>
 </html>

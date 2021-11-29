@@ -52,7 +52,10 @@ class Server:
 
             try:
                 if self.client_response(client, addr):
+                    client.close()
                     break
             except:
                 client.close()
                 return False
+
+        logging.info(f"Disconnected to client {addr[0]}:{addr[1]}")

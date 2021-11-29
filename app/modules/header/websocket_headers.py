@@ -78,7 +78,6 @@ class WebSocket(Header):
                 if TEMP_HEADER["Mask"] == 1:
                     TEMP_HEADER["Mask-Key"] = list(map(lambda i: TEMP_HEADER["Mask-Key"] >> ((3 - i)*8) & 0xff, range(4)))
                     target = list(target)
-                    print(target)
                     for i in range(len(target)):
                         target[i] = chr(target[i] ^ TEMP_HEADER["Mask-Key"][i % 4])
                     target = ''.join(target).encode('utf-8')
@@ -102,3 +101,6 @@ class WebSocket(Header):
             return int(res.bin, 2)
         else:
             return None
+
+    def raw(self) -> ByteString:
+        return self.HEADER
