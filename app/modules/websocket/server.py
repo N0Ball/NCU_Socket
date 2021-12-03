@@ -8,13 +8,8 @@ from ..socket.server import Server
 from ..header.http_headers import HTTP11, HTTPStatus
 from ..header import websocket_headers
 
-class OpCode:
-
-    TEXT = 0x1
-    BINARY = 0x2
-    CLOSE = 0x8
-    PING = 0x9
-    PONG = 0xa
+class Terminate(Exception):
+    pass
 
 class Client:
 
@@ -96,10 +91,10 @@ class _WebSocket:
         websocket_frame = websocket_headers.WebSocket(rec).to_dict()
         opcode = websocket_frame["OpCode"]
 
-        if opcode == OpCode.CLOSE:
+        if opcode == websocket_headers.OpCode.CLOSE:
             self.terminate(client)
-            return "Socket had closed"
-        elif opcode == OpCode.TEXT:
+            return "A Websocket was closed"
+        elif opcode == websocket_headers.OpCode.TEXT:
             return websocket_frame["Payload data"]
         else:
             raise ValueError("Invalid OpCode recieved")
@@ -124,6 +119,8 @@ class _WebSocket:
                 break
         
         self.CLIENTS.remove(target)
+        
+        raise Terminate
 
 class WebSocket(_WebSocket):
 
@@ -132,28 +129,24 @@ class WebSocket(_WebSocket):
         self.SOCKET = Server(host, port, backlog)
 
         @self.SOCKET.client()
-        def client_response(client, addr) -> bool:
+        def _(client, addr) -> bool:
 
             try:
 
                 self._register(client, addr) if not self._check_register(addr[0], addr[1], client) else self._serve(client, addr)
+                return False
 
-                if self.TERMINATE:
-                    self.TERMINATE = False
-                    return True
-                else:
-                    return False
+            except Terminate:
+                return True
 
             except socket.timeout:
                 logging.info(f"Websocket closed because timeout")
                 self.terminate(client)
-                return True
 
             except Exception as e:
                 traceback.print_exc()
                 logging.error(f'Meet error: {e}')
                 self.terminate(client)
-                return True
 
     def run(self):
         self.SOCKET.run()

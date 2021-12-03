@@ -36,6 +36,9 @@ class Server:
         self.SERVER.close()
         logging.info(f"Socket closed Successfully")
 
+        import os
+        os._exit(0)
+
     def client(self):
         
         def wrapper(func):

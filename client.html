@@ -13,7 +13,7 @@
         ws = new WebSocket('ws://localhost:8000');
 
         ws.onmessage = (m) => {
-            console.log(m);
+            console.log(m.data);
         }
 
         function sendHello(){
