@@ -31,6 +31,8 @@ class Server:
             except KeyboardInterrupt:
                 break
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 logging.debug(f"Met error {e}")
 
          

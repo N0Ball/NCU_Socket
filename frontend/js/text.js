@@ -49,6 +49,7 @@ class TextManager{
             z-index: 99999;
             top: 0;
             left: 0;
+            padding-top: 3rem;
             pointer-events: none;
         `;
         this.ctx = canvas.getContext('2d');

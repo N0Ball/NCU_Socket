@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-HOST = os.getenv("HOST") or 'localhost'
-PORT = os.getenv("PORT") or 8000
+HOST = os.getenv("HOST") or '0.0.0.0'
+PORT = int(os.getenv("PORT")) or 8000
 BACKLOG = os.getenv("BACKLOG") or 10
 
 
@@ -27,8 +27,8 @@ class Deploy(BASEMODE):
     def __init__(self) -> None:
         super().__init__()
         self.MODE = "DEPLOY"
-        self.PORT = int(os.getenv('PORT')) or 8000
-        self.HOST = os.getenv('HOST') or '0.0.0.0'
+        self.PORT = PORT
+        self.HOST = HOST
         self.BACKLOG = 10
 
 class Debug(Dev):

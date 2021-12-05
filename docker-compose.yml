@@ -1,0 +1,22 @@
+version: '3'
+services:
+
+  frontend:
+    image: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    environment:
+      - NGINX_PORT=80
+
+  backend:
+    build: .
+    ports:
+      - "8000:80"
+    volumes:
+      - ./app:/usr/src/app
+    environment:
+      - MODE=DEPLOY
+    env_file:
+      - '.env'

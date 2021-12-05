@@ -138,6 +138,10 @@ class _WebSocket:
             logging.info("Client lost due to client error")
             self.terminate(client)
 
+        except Exception as e:
+            traceback.print_exc()
+            logging.error(f"Meet Error {e}")
+
     def terminate(self, client: socket) -> None:
 
         client.close()

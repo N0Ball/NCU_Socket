@@ -17,20 +17,39 @@
             <button class="submit primary" onclick="sendMsg();">Submit</button>
         </div>
     </div>
+    <div>
+        <input type="text" name="host-name" id="host-name" placeholder="Host to connect">
+        <button type="submit" onclick="initWebSocket();">Connect</button>
+    </div>
     <script src="./js/com.js"></script>
     <script>
         const target = document.getElementById('send-msg');
+        let ws = undefined;
 
-        ws = new WebSocket('ws://localhost:8000');
+        function initWebSocket(){
+            const host = document.getElementById('host-name').value;
+            ws = new WebSocket(`ws://${host}`);
 
-        ws.onmessage = (m) => {
-            console.log(`recved: ${m.data}`);
-            recv = new COMRecv(m.data);
-            recv = recv.json;
+            setTimeout(() => {
+                try {
+                    payload = new COMSend(COMOp.PING, "ping");
+                    ws.send(payload.json());
+                    alert("Connection Successed!");
+                } catch (error) {
+                    alert("Connection failed");
+                }
+            }, 500);
 
-            if (recv["OP"] == COMOp.MSG){
-                pushMsg(decodeUtf8(recv["DATA"]));
+
+            ws.onmessage = (m) => {
+                recv = new COMRecv(m.data);
+                recv = recv.json;
+
+                if (recv["OP"] == COMOp.MSG){
+                    pushMsg(decodeUtf8(recv["DATA"]));
+                }
             }
+
         }
 
         function sendMsg(){

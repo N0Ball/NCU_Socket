@@ -30,7 +30,8 @@ def client_response(self, client, addr):
 
         if msg.OP == ClientOperation.PING:
             logging.info(f"{addr[0]}:{addr[1]} tries to ping")
-            self.send(client, addr, Com(OP=ClientOperation.PONG, DATA=datetime.now).dict())
+            payload = json.dumps(Com(OP=ClientOperation.PONG, DATA=datetime.now().strftime("%H:%M:%S")).dict())
+            self.send(client, addr, payload)
             return
 
         if msg.OP == ClientOperation.MSG:
@@ -39,10 +40,12 @@ def client_response(self, client, addr):
             return
 
     except ValidationError as e:
-        logging.warning("Client sent an unknown type")
+        logging.warning(f"Client sent an unknown type")
         logging.debug(f"Error: {e}")
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         logging.debug(f"Meet Error {e}")
 
 if __name__ == '__main__':
