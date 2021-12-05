@@ -1,3 +1,6 @@
+bitstring==3.1.9
 coloredlogs==15.0.1
 humanfriendly==10.0
+pydantic==1.8.2
 python-dotenv==0.19.2
+typing-extensions==4.0.1

@@ -1,6 +1,6 @@
 import unittest
 
-from ..websocket_headers import WebSocket
+from ..websocket_headers import OpCode, WebSocket
 
 HEADER_WITHOUT_MASK = b"\x81\x45\x68\x65\x6c\x6c\x6f"
 HEADER_WITH_MASK = b"\x81\xaa\x0b\xb7\x7b\x08\x70\x95\x08\x7c\x6a\xc3\x0e\x7b\x29\x8d\x59\x6f\x64\xd8\x1f\x2a\x27\x95\x15\x67\x7f\xdf\x12\x66\x6c\x95\x41\x7c\x79\xc2\x1e\x24\x29\xf8\x2e\x47\x29\x8d\x4a\x3a\x38\xca"
@@ -15,9 +15,9 @@ class WebSocketHeaderTestCase(unittest.TestCase):
         self.assertEqual(FIN, 1)
         self.assertEqual(PL, expt)
 
-    def _test_create(self, target, expt):
+    def _test_create(self, target, expt, **kwargs):
         socket = WebSocket()
-        socket.create(target)
+        socket.create(target, **kwargs)
         self.assertEqual(socket.HEADER, expt)
 
     def test_without_mask(self):
@@ -26,8 +26,10 @@ class WebSocketHeaderTestCase(unittest.TestCase):
         self._test_WebSocket_parser(HEADER_WITH_MASK, '{"status":"good","nothing":true,"OUO":123}')
     def test_with_long_data(self):
         self._test_WebSocket_parser(LONG_HEADER, '{"method":"Debugger.scriptParsed","params":{"scriptId":"254","url":"file:///c:/Users/chain/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/node_modules.asar/get-uri/node_modules/file-uri-to-path/dist/src/index.js","startLine":0,"startColumn":0,"endLine":51,"endColumn":3,"executionContextId":1,"hash":"2900fd891a08d1ad4509719e35de1482304cf82a","executionContextAuxData":{"isDefault":true},"isLiveEdit":false,"sourceMapURL":"https://ticino.blob.core.windows.net/sourcemaps/ccbaa2d27e38e5afa3e5c21c1c7bef4657064247/node_modules/get-uri/node_modules/file-uri-to-path/dist/src/index.js.map","hasSourceURL":false,"isModule":false,"length":2042,"stackTrace":{"callFrames":[{"functionName":"_acceptInsertText","scriptId":"132","url":"file:///c:/Users/chain/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/workbench/services/extensions/node/extensionHostProcess.js","lineNumber":76,"columnNumber":16778}]},"scriptLanguage":"JavaScript","embedderName":"file:///c:/Users/chain/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/node_modules.asar/get-uri/node_modules/file-uri-to-path/dist/src/index.js"}}')
-    def test_create(self):
+    def test_create_text(self):
         self._test_create("{'OUO': 'OUO!', 'status': 100}", b"\x81\x1e{'OUO': 'OUO!', 'status': 100}")
+    def test_create_ping(self):
+        self._test_create("deadbeef", b"\x89\x08deadbeef", opcode=OpCode.PING)
         
 
 

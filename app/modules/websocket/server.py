@@ -1,12 +1,16 @@
+import os
 import traceback
 import logging
 import hashlib
-import socket
+import signal
 import base64
-from typing import ByteString
+from socket import socket
+from typing import ByteString, List
 from ..socket.server import Server
 from ..header.http_headers import HTTP11, HTTPStatus
 from ..header import websocket_headers
+
+HEARTBEAT_PASSTIME = 30
 
 class Terminate(Exception):
     pass
@@ -14,15 +18,16 @@ class Terminate(Exception):
 class Client:
 
     def __init__(self, client, host, port) -> None:
-        self.CLIENT = client
-        self.ADDR = (host, port)
-        self.HOST = host
-        self.PORT = port
+        self.CLIENT: socket = client
+        self.ADDR: tuple = (host, port)
+        self.HOST: str = host
+        self.PORT: int = port
+        self.latency: int = 0
 
 class _WebSocket:
 
     def __init__(self):
-        self.CLIENTS = []
+        self.CLIENTS : List[Client] = []
         self.TERMINATE = False
     
     def _get_key(self, header: str) -> str:
@@ -70,7 +75,27 @@ class _WebSocket:
         logging.info(f"Send to {addr[0]}:{addr[1]}")
         logging.debug(f"MSG: {str(RES)}")
 
-    def _serve(self, client, addr):
+    def _heartbeat_handler(self, *args):
+
+        logging.debug("Trying to ping to all clients")
+
+        KEY = os.urandom(8).hex()
+
+        for client in self.CLIENTS:
+            logging.debug(f"Try ping to {client.HOST}: {client.ADDR}")
+
+            self.send(client.CLIENT, client.ADDR, KEY, websocket_headers.OpCode.PING)
+            recv = self.recv(client.CLIENT, client.ADDR)
+
+            if not recv == KEY:
+                logging.debug("Pong failed due to wrong key")
+                self.terminate(client.CLIENT)
+
+            logging.debug(f"Ping success to client {client.HOST}:{client.ADDR}")
+        
+        signal.alarm(HEARTBEAT_PASSTIME)
+
+    def _serve(self, client: socket, addr: tuple):
         self.serv_func(self, client, addr)
 
     def client(self):
@@ -84,7 +109,7 @@ class _WebSocket:
         for client in self.CLIENTS:
             self.send(client.CLIENT, client.ADDR, msg)
 
-    def recv(self, client, addr) -> str:
+    def recv(self, client: socket, addr: tuple) -> str:
         rec = client.recv(0xfffffff)
         logging.info(f"Recieve data from {addr[0]}:{addr[1]}")
         logging.debug(f"MSG: {rec}")
@@ -94,19 +119,26 @@ class _WebSocket:
         if opcode == websocket_headers.OpCode.CLOSE:
             self.terminate(client)
             return "A Websocket was closed"
-        elif opcode == websocket_headers.OpCode.TEXT:
+
+        if opcode == websocket_headers.OpCode.TEXT or opcode == websocket_headers.OpCode.PONG:
             return websocket_frame["Payload data"]
-        else:
-            raise ValueError("Invalid OpCode recieved")
+        
+        raise ValueError("Invalid OpCode recieved")
 
-    def send(self, client, addr, msg: str) -> None:
-        payload = websocket_headers.WebSocket()
-        payload.create(msg)
-        client.send(payload.raw())
-        logging.info(f"Send data to {addr[0]}:{addr[1]}")
-        logging.debug(f"MSG: {msg}")
+    def send(self, client: socket, addr: tuple, msg: str, opcode: websocket_headers.OpCode = websocket_headers.OpCode.TEXT, fin: bool = True) -> None:
 
-    def terminate(self, client) -> None:
+        try:
+            payload = websocket_headers.WebSocket()
+            payload.create(msg, opcode=opcode, fin=fin)
+            client.send(payload.raw())
+            logging.info(f"Send data to {addr[0]}:{addr[1]}")
+            logging.debug(f"MSG: {msg}")
+
+        except OSError:
+            logging.info("Client lost due to client error")
+            self.terminate(client)
+
+    def terminate(self, client: socket) -> None:
 
         client.close()
         target = None
@@ -128,8 +160,10 @@ class WebSocket(_WebSocket):
         super().__init__()
         self.SOCKET = Server(host, port, backlog)
 
+        signal.signal(signal.SIGALRM, self._heartbeat_handler)
+
         @self.SOCKET.client()
-        def _(client, addr) -> bool:
+        def _(client: socket, addr: tuple) -> bool:
 
             try:
 
@@ -149,4 +183,5 @@ class WebSocket(_WebSocket):
                 self.terminate(client)
 
     def run(self):
+        signal.alarm(HEARTBEAT_PASSTIME)
         self.SOCKET.run()
