@@ -47,7 +47,7 @@ def getModeConfig(status: str) -> BASEMODE:
     }.get(status, None)
 
     if res == None:
-        raise ValueError("No such Mode")
-        # res = Debug()
+        # raise ValueError("No such Mode")
+        res = Debug()
 
     return res

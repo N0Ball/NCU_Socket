@@ -61,7 +61,7 @@ class WebSocket(Header):
         elif length > 0xffff:
             payload_len = 127
             extend_len = length
-        elif length > 0xff-1:
+        elif length > (0xff >> 1) - 2:
             payload_len = 126
             extend_len = length
         else:
@@ -71,10 +71,10 @@ class WebSocket(Header):
         payload += payload_len.to_bytes(1, byteorder='big')
         if extend_len == 0:
             payload += msg
-        elif payload_len == 127:
-            payload += extend_len.to_bytes(4, byteorder='big') + msg
         elif payload_len == 126:
-            payload += extend_len.to_bytes(16, byteorder='big') + msg
+            payload += extend_len.to_bytes(2, byteorder='big') + msg
+        elif payload_len == 127:
+            payload += extend_len.to_bytes(8, byteorder='big') + msg
         else:
             raise SystemError("payload_len is not correctlly set")
 
