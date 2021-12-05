@@ -24,13 +24,14 @@ class Server:
 
             try:
                 conn, addr = self.SERVER.accept()
-                conn.settimeout(60)
                 logging.debug(f"Connected to {addr[0]}:{addr[1]}")
                 threading.Thread(target = self.client_conn, args = (conn, addr)).start()
             except timeout:
                 pass
             except KeyboardInterrupt:
                 break
+            except Exception as e:
+                logging.debug(f"Met error {e}")
 
          
         self.SERVER.close()

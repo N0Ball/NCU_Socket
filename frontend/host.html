@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .pdf-container{
+            position: absolute;
+            height: 100vh;
+            width: 100vw;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        .hidden{
+            display: none;
+        }
+        .input{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+            margin-top: 3rem;
+            width: 50vw;
+            height: 30vh;
+            flex-direction: column;
+            background-color: red;
+            z-index: 10000;
+        }
+        .input-item{
+            margin: .5rem;
+        }
+    </style>
+    <title>HOST</title>
+</head>
+<body>
+    <div class="input" id="input">
+        <div class="host-name input-item">
+            <label for="host-name"></label>
+            <input type="text" name="host" id="host-name" placeholder="Enter Host IP">
+        </div>
+        <div class="pdf-name input-item">
+            <label for="pdf-target">Select a pdf file:</label>
+            <input type="file" id="pdf-target">
+        </div>
+        <button type="submit" onclick="submit();">Submit</button>
+    </div>
+    <div class="pdf-container hidden" id='pdf-container'>
+        <iframe src="#" frameborder="0" height="100%" width="100%" id="pdf-view"></iframe>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script src="./js/text.js"></script>
+    <script src="./js/com.js"></script>
+    <script>
+        const canvas = document.getElementById('canvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const tms = new TextManager(canvas);
+
+        const pdfContainer = document.getElementById('pdf-container');
+        const pdfTarget = document.getElementById('pdf-target');
+        const pdfView = document.getElementById('pdf-view');
+        const input = document.getElementById('input');
+        const host = document.getElementById('host-name');
+        let isSet = false;
+        let ws = undefined;
+
+        function initWebSocket(host){
+            ws = new WebSocket(`ws://${host}`);
+
+            ws.onmessage = (m) => {
+                data = JSON.parse(m.data);
+                if (data["OP"] == COMOp.MSG){
+                    tms.addText(decodeUtf8(data["DATA"]));
+                }
+            }
+        }
+
+        function submit(){
+            
+            target = pdfTarget.value.split('\\');
+            let pdf = '';
+            
+            for (let i = 2; i < target.length; i++){
+                pdf += '/' + target[i];
+            }
+            console.log(pdf);
+            pdfView.src = pdf;
+            isSet = true;
+
+            input.classList.add('hidden');
+            pdfContainer.classList.remove('hidden');
+
+            initWebSocket(host.value);
+        }
+  
+        function update(){
+            requestAnimationFrame(update);
+            tms.update();
+        }
+
+        update();
+    </script>
+</body>
+</html>

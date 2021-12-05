@@ -15,18 +15,10 @@ class COMSend{
 class COMRecv{
     constructor(json){
         this.json = JSON.parse(json);
-
-        this.operate(this.json);
     }
 
-    operate(json){
-        console.log(json);
-        let op = json.OP;
-        let data = json.DATA;
-
-        if(op == COMOp.MSG){
-            pushMsg(data);
-        }
+    json(){
+        return this.json;
     }
 }
 
@@ -40,3 +32,7 @@ class COMOp{
 }
 
 COMOp = new COMOp();
+
+function decodeUtf8(s) {
+    return decodeURIComponent(escape(s));
+  }

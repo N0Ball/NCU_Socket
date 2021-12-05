@@ -1,0 +1,82 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+ul {
+    list-style: none;
+}
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+}
+.chatroom{
+    opacity: .5;
+    display: flex;
+    flex-direction: column-reverse;
+    height: 80vh;
+    width: 80vw;
+}
+#chatroom{
+    display: block;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: inline-block;
+}
+.chatroom-item{
+    display: block;
+    position: relative;
+    margin: .25rem;
+    padding: 1.5rem;
+    text-align: center;
+}
+.chatroom-item::before{
+    content: "";
+    background-image: url("../src/profile-user.png");
+    background-size: 25px 25px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    margin: .25rem;
+}
+.input-container{
+    width: 80vw;
+    display: flex;
+    flex-direction: column;
+    margin: .5rem;
+}
+input[type=text]{
+    width: 100%;
+    padding: 12px 20px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+button {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    margin: 8px 0;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+.major{
+    background-color: #415a77;
+    color:#e0e1dd;
+}
+.primary{
+    background-color: #778da9;
+    color:#0d1b2a;
+}
+.dark{
+    background-color: #0d1b2a;
+    color: #e0e1dd;
+}
+.light{
+    background-color: #e0e1dd;
+    color:#0d1b2a;
+}

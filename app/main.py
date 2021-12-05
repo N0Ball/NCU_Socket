@@ -29,12 +29,12 @@ def client_response(self, client, addr):
         logging.debug(f"OP: {msg.OP}, DATA: {msg.DATA}")
 
         if msg.OP == ClientOperation.PING:
-            logging.info(f"{addr[0]}{addr[1]} tries to ping")
+            logging.info(f"{addr[0]}:{addr[1]} tries to ping")
             self.send(client, addr, Com(OP=ClientOperation.PONG, DATA=datetime.now).dict())
             return
 
         if msg.OP == ClientOperation.MSG:
-            logging.info(f"{addr[0]}{addr[1]} tries to boardcast message")
+            logging.info(f"{addr[0]}:{addr[1]} tries to boardcast message")
             self.broadcast(json.dumps(Com(OP=ClientOperation.MSG, DATA=msg.DATA).dict()))
             return
 
