@@ -21,8 +21,9 @@ As a frequently connecting service, the system can be done by webhooks such as p
 Since this project is for NCU's computer network course, a socket api is required; therefore, this project uses a socket to provide a websocket.
 
 ## Technologies
-- socket (A Web Server for socket connections)
-- websocket (Connections between clients, server and the host)
+- [socket](app/modules/socket/README.md) (A Web Server for socket connections)
+- [websocket](app/modules/websocket/README.md) (Connections between clients, server and the host)
+- [header](app/modules/header/README.md) (To parse the datas)
 - client & host page (frontend renderer for the project)
 
 # Usage
@@ -74,7 +75,7 @@ docker-compose up -d
 - Choose the presentation file
 - Submit
   
-[client](http://localhost:8000/client.html)
+[client](http://localhost:8000/client.html) <br>
 ![](src/test_1.png)
 - Pull to the bottom
 - Enter the Host IP (`<IP>:<Port>` if port is not 80)
