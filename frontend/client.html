@@ -13,7 +13,7 @@
             <ul id="chatroom"></ul>
         </div>
         <div class="input-container">
-            <input type="text" name="msg" id="send-msg" onkeypress="if (event.keyCode == 13) {sendMsg();}; this.value = '';" placeholder="Type the message to send">
+            <input type="text" name="msg" id="send-msg" onkeypress="if (event.keyCode == 13) {sendMsg();this.value = '';}; " placeholder="Type the message to send">
             <button class="submit primary" onclick="sendMsg();">Submit</button>
         </div>
     </div>

@@ -42,5 +42,8 @@ def client_response(self, client, addr):
         logging.warning("Client sent an unknown type")
         logging.debug(f"Error: {e}")
 
+    except Exception as e:
+        logging.debug(f"Meet Error {e}")
+
 if __name__ == '__main__':
     SERVER.run()
